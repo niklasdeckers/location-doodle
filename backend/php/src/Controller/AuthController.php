@@ -12,8 +12,20 @@ class AuthController extends FOSRestController
      */
     public function getAuthAction()
     {
-        // TODO: write to database
-        return new JsonResponse(hash('sha512', $this->getUniqueIdentifier()));
+        $uuid=$this->getUniqueIdentifier();
+
+        $em = $this->getDoctrine()->getManager();
+
+        $RAW_QUERY = 'INSERT INTO client (auth_token) VALUES (:uuid);';
+
+        $statement = $em->getConnection()->prepare($RAW_QUERY);
+        // Set parameters
+        $statement->bindValue('uuid', $uuid);
+        $statement->execute();
+
+        //$result = $statement->fetchAll();
+
+        return new JsonResponse(hash('sha512',$uuid ));
     }
 
     /**
