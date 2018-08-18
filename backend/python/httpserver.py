@@ -21,8 +21,8 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(str.encode(DUMMY_RESPONSE))
 
 
-def run(server_class=http.server.HTTPServer, handler_class=CustomHandler):
-    server_address = ('', 8080)
+def run(port, server_class=http.server.HTTPServer, handler_class=CustomHandler):
+    server_address = ('', port)
     httpd = server_class(server_address, handler_class)
     httpd.serve_forever()
 
