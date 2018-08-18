@@ -20,11 +20,6 @@ class Event
     public $startTime;
 
     /**
-     * @var \DateTime
-     */
-    public $subscriptionDeadline;
-
-    /**
      * @var string
      */
     public $displayName;
@@ -37,20 +32,17 @@ class Event
     /**
      * @param Participant $invitor
      * @param \DateTime $startTime
-     * @param \DateTime $subscriptionDeadline
      * @param string $displayName
      * @param string $topic
      */
     public function __construct(
         Participant $invitor,
         \DateTime $startTime,
-        \DateTime $subscriptionDeadline,
         $displayName,
         $topic
     ) {
         $this->participants = [$invitor];
         $this->startTime = $startTime;
-        $this->subscriptionDeadline = $subscriptionDeadline;
         $this->displayName = $displayName;
         $this->topic = $topic;
 
