@@ -1,9 +1,19 @@
 import http.server
+import json
+from urllib.parse import urlparse, parse_qs
+
+from logic import optimal_meeting_points
 
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
-        DUMMY_RESPONSE=str(self)
+
+        get = parse_qs(urlparse(self.path).query)
+
+        result=optimal_meeting_points(get["arrival_time"],json.loads(get["starting_locations"]))
+
+        DUMMY_RESPONSE=json.dumps(result)
+
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.send_header("Content-length", len(DUMMY_RESPONSE))
@@ -16,14 +26,3 @@ def run(server_class=http.server.HTTPServer, handler_class=CustomHandler):
     httpd = server_class(server_address, handler_class)
     httpd.serve_forever()
 
-
-"""
-
-'''
-@return list of optimal meeting points as "long,lat"
-'''
-def optimal_meeting_points(arrival_time: str, starting_locations: List[str]) -> List[str]:
-   pass
-
-
-"""
