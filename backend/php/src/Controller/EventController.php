@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Model\Event;
-use App\Model\Invitor;
+use App\Model\Participant;
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,6 +15,9 @@ class EventController extends FOSRestController
 
     const PARAM_INVITOR_DISPLAY_NAME = 'invitor_display_name';
     const PARAM_INVITOR_LOCATION = 'invitor_location';
+
+    const PARAM_PARTICIPANT_DISPLAY_NAME = 'participant_display_name';
+    const PARAM_PARTICIPANT_LOCATION = 'participant_location';
 
     const PARAM_EVENT_SUBSCRIPTION_DEADLINE = 'event_subscription_deadline';
     const PARAM_EVENT_START_TIME = 'event_start_time';
@@ -32,7 +35,7 @@ class EventController extends FOSRestController
             throw new AccessDeniedHttpException();
         }
 
-        $event = $this->getEventByRequest($request);
+        $event = $this->createEventByRequest($request);
 
         return new JsonResponse($event);
     }
@@ -49,7 +52,7 @@ class EventController extends FOSRestController
             throw new AccessDeniedHttpException();
         }
 
-        // TODO: 403 wenn ich kein Participant bin
+        // TODO: 403 wenn ich kein Participant oder Invitor bin
         // TODO: 404 wenn Event nicht gefunden werden kann
 
         return new JsonResponse(Event::getMockedEvent($eventId));
@@ -57,14 +60,36 @@ class EventController extends FOSRestController
 
     /**
      * @param Request $request
+     * @param string $eventId
+     *
+     * @return JsonResponse
+     */
+    public function postEventParticipantAction(Request $request, $eventId)
+    {
+        if (!$request->headers->has(self::HEADER_AUTHORIZATION)) {
+            throw new AccessDeniedHttpException();
+        }
+
+        $name = $request->get(self::PARAM_PARTICIPANT_DISPLAY_NAME);
+        $location = $request->get(self::PARAM_PARTICIPANT_LOCATION);
+        $participant = new Participant($name, $location, false);
+
+        $event = Event::getMockedEvent($eventId);
+        $event->addParticipant($participant);
+
+        return new JsonResponse($event);
+    }
+
+    /**
+     * @param Request $request
      *
      * @return Event
      */
-    private function getEventByRequest(Request $request)
+    private function createEventByRequest(Request $request)
     {
         $invitorName = $request->get(self::PARAM_INVITOR_DISPLAY_NAME);
         $location = $request->get(self::PARAM_INVITOR_LOCATION);
-        $invitor = new Invitor($invitorName, $location);
+        $invitor = new Participant($invitorName, $location, true);
 
         $startTime = new \DateTime($request->get(self::PARAM_EVENT_START_TIME));
         $subscriptionDeadline = new \DateTime($request->get(self::PARAM_EVENT_SUBSCRIPTION_DEADLINE));

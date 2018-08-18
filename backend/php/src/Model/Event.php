@@ -10,9 +10,9 @@ class Event
     public $eventId;
 
     /**
-     * @var Invitor
+     * @var Participant[]
      */
-    public $invitor;
+    public $participants;
 
     /**
      * @var \DateTime
@@ -35,26 +35,38 @@ class Event
     public $topic;
 
     /**
-     * @param Invitor $invitor
+     * @param Participant $invitor
      * @param \DateTime $startTime
      * @param \DateTime $subscriptionDeadline
      * @param string $displayName
      * @param string $topic
      */
     public function __construct(
-        Invitor $invitor,
+        Participant $invitor,
         \DateTime $startTime,
         \DateTime $subscriptionDeadline,
         $displayName,
         $topic
     ) {
-        $this->invitor = $invitor;
+        $this->participants = [$invitor];
         $this->startTime = $startTime;
         $this->subscriptionDeadline = $subscriptionDeadline;
         $this->displayName = $displayName;
         $this->topic = $topic;
 
         $this->eventId = '123456'; // TODO: ReplaceMe with logic
+    }
+
+    /**
+     * @param Participant $participant
+     */
+    public function addParticipant(Participant $participant)
+    {
+        if ($this->hasParticipant($participant)) {
+            return;
+        }
+
+        $this->participants[] = $participant;
     }
 
     /**
@@ -65,7 +77,7 @@ class Event
     public static function getMockedEvent($eventId)
     {
         $event = new self(
-            Invitor::getMockedInvitor(),
+            Participant::getMockedInvitor(),
             new \DateTime('+2  Weeks'),
             new \DateTime('tomorrow'),
             'Kugel schieben mit den Jungs',
@@ -74,5 +86,15 @@ class Event
         $event->eventId = $eventId;
 
         return $event;
+    }
+
+    /**
+     * @param Participant $participant
+     * @return bool
+     */
+    private function hasParticipant(Participant $participant)
+    {
+        // TODO: check if participant is already added (maybe by AuthToken?)
+        return false;
     }
 }
