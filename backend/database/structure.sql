@@ -19,7 +19,7 @@ CREATE TABLE `event` (
   `invitation_code` varchar(128) NOT NULL,
   `event_time` datetime NOT NULL,
   `creator` varchar(128) NOT NULL,
-  `output-cache` text NOT NULL,
+  `output_cache` text NOT NULL,
   PRIMARY KEY (`invitation_code`),
   KEY `creator` (`creator`),
   CONSTRAINT `event_ibfk_1` FOREIGN KEY (`creator`) REFERENCES `client` (`auth_token`)
