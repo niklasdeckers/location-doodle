@@ -67,14 +67,18 @@ class Event
     /**
      * @param Participant $participant
      */
-    public function addParticipant(Participant $participant)
+    public function addParticipantToDB(Participant $participant)
     {
         if ($this->hasParticipant($participant)) {
             return;
         }
 
+        //TODO DB logic
+
+
         $this->participants[] = $participant;
     }
+
 
     /**
      * @param string $eventId
@@ -103,7 +107,7 @@ class Event
     public static function getEventFromDB($eventId)
     {
 
-
+//TODO db logic
         $event = new self(
             Participant::getMockedInvitor(),
             new \DateTime('+2  Weeks'),
@@ -122,7 +126,14 @@ class Event
      */
     private function hasParticipant(Participant $participant)
     {
+
+        //TODO db logic
         // TODO: check if participant is already added (maybe by AuthToken?)
         return false;
+    }
+
+    public function writeToDB(){
+
+        //todo db logic
     }
 }
