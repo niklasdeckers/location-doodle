@@ -28,6 +28,8 @@ class EventController extends FOSRestController
      * @param Request $request
      *
      * @return JsonResponse
+     *
+     * Create new event (calls background method)
      */
     public function postEventAction(Request $request)
     {
@@ -45,6 +47,8 @@ class EventController extends FOSRestController
      * @param string $eventId
      *
      * @return JsonResponse
+     *
+     * get all data needed for displaying subscribed event
      */
     public function getEventAction(Request $request, $eventId)
     {
@@ -79,6 +83,8 @@ class EventController extends FOSRestController
      * @param string $eventId
      *
      * @return JsonResponse
+     *
+     * subscribe to event (accept invitation via multi-use link)
      */
     public function postEventParticipantAction(Request $request, $eventId)
     {
@@ -90,8 +96,8 @@ class EventController extends FOSRestController
         $location = $request->get(self::PARAM_PARTICIPANT_LOCATION);
         $participant = new Participant($name, $location, false);
 
-        $event = Event::getMockedEvent($eventId);
-        $event->addParticipant($participant);
+        $event = Event::getEventFromDB($eventId);
+        $event->addParticipantToDB($participant);
 
         return new JsonResponse($event);
     }
@@ -100,6 +106,8 @@ class EventController extends FOSRestController
      * @param Request $request
      *
      * @return Event
+     *
+     * Create new event
      */
     private function createEventByRequest(Request $request)
     {
@@ -119,6 +127,8 @@ class EventController extends FOSRestController
             $displayName,
             $topic
         );
+
+        $event->writeToDB();
 
         return $event;
     }
