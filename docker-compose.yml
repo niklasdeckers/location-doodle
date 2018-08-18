@@ -5,6 +5,7 @@ services:
     build:
       context: ./backend/python
       dockerfile: Dockerfile
+    restart: always
     ports:
       - 28282:8080
 
@@ -12,7 +13,24 @@ services:
     build:
       context: ./backend/php
       dockerfile: Dockerfile
+    restart: always
     volumes:
       - ./backend/php/.composer_cache:/root/composer/
     ports:
       - 18181:8181
+
+  db:
+    image: mysql:5.7
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    volumes:
+      - ./.db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: elcolvgb
+      MYSQL_DATABASE: locle
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 38383:8080
