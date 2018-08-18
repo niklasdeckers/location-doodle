@@ -52,10 +52,26 @@ class EventController extends FOSRestController
             throw new AccessDeniedHttpException();
         }
 
-        // TODO: 403 wenn ich kein Participant oder Invitor bin
-        // TODO: 404 wenn Event nicht gefunden werden kann
 
-        return new JsonResponse(Event::getMockedEvent($eventId));
+        $em = $this->getDoctrine()->getManager();
+
+        $RAW_QUERY = 'SELECT * FROM participation where client = :client and event = :event;';
+
+        $statement = $em->getConnection()->prepare($RAW_QUERY);
+        // Set parameters
+        $statement->bindValue('client', $request->headers->get(self::HEADER_AUTHORIZATION));
+        $statement->bindValue('event', $eventId);
+        $statement->execute();
+
+        $result = $statement->fetchAll();
+        if(!$result){
+            throw new AccessDeniedHttpException();
+        }
+
+
+        $event=getEventFromDB($eventId);
+
+        return new JsonResponse($event);
     }
 
     /**
