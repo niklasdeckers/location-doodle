@@ -1,7 +1,12 @@
-FROM php:7.2-apache
+FROM php:7.2-cli
 
-COPY . /var/www/html
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+RUN php composer-setup.php
+RUN mv composer.phar /usr/local/bin/composer
 
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+WORKDIR /data
+COPY . .
+
+RUN composer install
+
+CMD [ "php", "./bin/console", "server:run", "0.0.0.0:8181" ]
