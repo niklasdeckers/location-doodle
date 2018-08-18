@@ -1,0 +1,11 @@
+version: '3.3'
+
+services:
+  backend_python:
+    build:
+      context: ./backend/python
+      dockerfile: Dockerfile
+    ports:
+      - 28282:8080
+
+  #backend_php:
