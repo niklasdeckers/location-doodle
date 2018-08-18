@@ -56,4 +56,23 @@ class Event
 
         $this->eventId = '123456'; // TODO: ReplaceMe with logic
     }
+
+    /**
+     * @param string $eventId
+     *
+     * @return Event
+     */
+    public static function getMockedEvent($eventId)
+    {
+        $event = new self(
+            Invitor::getMockedInvitor(),
+            new \DateTime('+2  Weeks'),
+            new \DateTime('tomorrow'),
+            'Kugel schieben mit den Jungs',
+            'Fussball'
+        );
+        $event->eventId = $eventId;
+
+        return $event;
+    }
 }

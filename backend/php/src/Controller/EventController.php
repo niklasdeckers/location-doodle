@@ -39,6 +39,24 @@ class EventController extends FOSRestController
 
     /**
      * @param Request $request
+     * @param string $eventId
+     *
+     * @return JsonResponse
+     */
+    public function getEventAction(Request $request, $eventId)
+    {
+        if (!$request->headers->has(self::HEADER_AUTHORIZATION)) {
+            throw new AccessDeniedHttpException();
+        }
+
+        // TODO: 403 wenn ich kein Participant bin
+        // TODO: 404 wenn Event nicht gefunden werden kann
+
+        return new JsonResponse(Event::getMockedEvent($eventId));
+    }
+
+    /**
+     * @param Request $request
      *
      * @return Event
      */
