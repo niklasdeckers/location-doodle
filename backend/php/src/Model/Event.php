@@ -7,32 +7,32 @@ class Event
     /**
      * @var string
      */
-    private $eventId;
+    public $eventId;
 
     /**
      * @var Invitor
      */
-    private $invitor;
+    public $invitor;
 
     /**
      * @var \DateTime
      */
-    private $startTime;
+    public $startTime;
 
     /**
      * @var \DateTime
      */
-    private $subscriptionDeadline;
+    public $subscriptionDeadline;
 
     /**
      * @var string
      */
-    private $displayName;
+    public $displayName;
 
     /**
      * @var string
      */
-    private $topic;
+    public $topic;
 
     /**
      * @param Invitor $invitor

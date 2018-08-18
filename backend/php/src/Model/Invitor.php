@@ -7,12 +7,12 @@ class Invitor
     /**
      * @var string
      */
-    private $displayName;
+    public $displayName;
 
     /**
      * @var array (lat;lon)
      */
-    private $location;
+    public $location;
 
     /**
      * @param string $displayName
