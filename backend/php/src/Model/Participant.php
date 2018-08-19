@@ -15,16 +15,16 @@ class Participant
     public $location;
 
     /**
-     * @var boolean
+     * @var string
      */
-    public $isInvitor;
+    public $auth_token;
 
     /**
      * @param string $displayName
      * @param array $location
-     * @param $isInvitor
+     * @param string $auth_token
      */
-    public function __construct($displayName, array $location, $isInvitor)
+    public function __construct($displayName, array $location, $auth_token)
     {
         foreach ($location as $key => $value) {
             $location[$key] = (float) $value;
@@ -32,7 +32,7 @@ class Participant
 
         $this->displayName = $displayName;
         $this->location = $location;
-        $this->isInvitor = $isInvitor;
+        $this->auth_token = $auth_token;
     }
 
     /**
