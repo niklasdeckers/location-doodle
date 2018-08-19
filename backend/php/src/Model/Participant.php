@@ -41,22 +41,6 @@ class Participant
     }
 
     /**
-     * @return Participant
-     */
-    public static function getMockedInvitor()
-    {
-        return new self('John Doe', ['lat' => 52.520008, 'lng' => 13.404954], true);
-    }
-
-    /**
-     * @return Participant
-     */
-    public static function getMockedParticipant()
-    {
-        return new self('Jane Doe', ['lat' => 52.520008, 'lng' => 13.404954], false);
-    }
-
-    /**
      * @return string
      */
     public function getEventId()
