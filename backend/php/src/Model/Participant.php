@@ -20,6 +20,11 @@ class Participant
     public $auth_token;
 
     /**
+     * @var string
+     */
+    private $eventId;
+
+    /**
      * @param string $displayName
      * @param array $location
      * @param string $auth_token
@@ -49,5 +54,21 @@ class Participant
     public static function getMockedParticipant()
     {
         return new self('Jane Doe', ['lat' => 52.520008, 'lng' => 13.404954], false);
+    }
+
+    /**
+     * @return string
+     */
+    public function getEventId()
+    {
+        return $this->eventId;
+    }
+
+    /**
+     * @param string $eventId
+     */
+    public function setEventId($eventId)
+    {
+        $this->eventId = $eventId;
     }
 }

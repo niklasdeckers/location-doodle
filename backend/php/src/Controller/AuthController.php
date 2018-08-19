@@ -2,39 +2,31 @@
 
 namespace App\Controller;
 
+use App\Repository\AuthRepository;
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class AuthController extends FOSRestController
 {
     /**
-     * @return JsonResponse
+     * @var AuthRepository
      */
-    public function getAuthAction()
+    private $repository;
+
+    /**
+     * @param AuthRepository $repository
+     */
+    public function __construct(AuthRepository $repository)
     {
-        $uuid=$this->getUniqueIdentifier();
-
-        $em = $this->getDoctrine()->getManager();
-
-        $RAW_QUERY = 'INSERT INTO client (auth_token) VALUES (:uuid);';
-
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        // Set parameters
-        $statement->bindValue('uuid', $uuid);
-        $statement->execute();
-
-        //$result = $statement->fetchAll();
-
-        return new JsonResponse($uuid);
+        $this->repository = $repository;
     }
 
     /**
-     * @return string
+     * @return JsonResponse
+     * @throws \Doctrine\DBAL\DBALException
      */
-    private function getUniqueIdentifier()
+    public function getAuthAction()
     {
-        $now = new \DateTime();
-
-        return hash('sha512',uniqid($now->getTimestamp()));
+        return new JsonResponse($this->repository->getAuthToken());
     }
 }
