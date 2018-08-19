@@ -145,6 +145,20 @@ class EventController extends FOSRestController
             'pending'
         );
 
+        // TODO: Fix python stack for bettter dertermination of nearest station
+        // TODO: Ask here api for Point of interest near the outpu_cache
+        // curl \
+        // --compressed \
+        //     -H 'Accept-Encoding:gzip' \
+        //     -H 'Accept-Language:de,de-DE;q=0.9,en-US;q=0.8,en;q=0.7,af;q=0.6' \
+        //     --get 'https://places.api.here.com/places/v1/discover/around' \
+        //     --data-urlencode 'app_code=dSeR84rhEUZEwBEV1NVGaA' \
+        //     --data-urlencode 'app_id=inyah45axuPunUzafruc' \
+        //     --data-urlencode 'cat=eat-drink' \
+        //     --data-urlencode 'in=52.510001,13.435747;r=1000' \
+        //     --data-urlencode 'pretty=true' \
+        //     --data-urlencode 'tf=plain'
+
         return new JsonResponse($suggestedLocation);
     }
 
