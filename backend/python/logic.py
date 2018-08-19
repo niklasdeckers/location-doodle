@@ -71,16 +71,29 @@ def optimize(maps,k=3):#TODO extend
     return [min( list(set.intersection(*(set(map.keys()) for map in maps))), key=(lambda k: s[k]+justice_factor(k)))]
 
 
-def station_search(stnIds):
+def places_api(location,topic=""):
     #print(starting_location)
-    url="https://transit.api.here.com/v3/stations/by_ids.json"
+    url="https://places.api.here.com/places/v1/discover/around"
     url+="?app_id=inyah45axuPunUzafruc"
     url+="&app_code=dSeR84rhEUZEwBEV1NVGaA"
-    url+="&stnIds="+",".join(stnIds)
+    url+="&in="+location+";r=1000"#radius in meters
+    if topic!="": url+="&cat="+topic
     return url
 
+def improve_starting_location(location):
+    url = "https://transit.api.here.com/v3/stations/by_geocoord.json"
+    url += "?app_id=inyah45axuPunUzafruc"
+    url += "&app_code=dSeR84rhEUZEwBEV1NVGaA"
+    url += "&center=" + location
+    url+="&radius=1000"  # radius in meters
+    url+="&max=1"
+    contents = urllib.request.urlopen(url).read()
+    parsed=json.loads(contents)
+    return str(parsed["Res"]["Stations"]["Stn"][0]["y"])+","+str(parsed["Res"]["Stations"]["Stn"][0]["x"])
 
-def optimal_meeting_points(arrival_time, starting_locations):
+def optimal_meeting_points(arrival_time, starting_locations,topic=""):
+
+    starting_locations=[improve_starting_location(loc) for loc in starting_locations]
     arrival_time = dateutil.parser.parse(arrival_time)
     #todo #print([generate_bundle_set(arrival_time,starting_location) for starting_location in starting_locations])
     res_generator=join_split_bundle_sets([generate_bundle_set(arrival_time,starting_location) for starting_location in starting_locations])
