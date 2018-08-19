@@ -58,6 +58,7 @@ class Event
         $this->startTime = $startTime;
         $this->displayName = $displayName;
         $this->topic = $topic;
+        $this->output_cache = '';
 
         $this->eventId = $this->getEventIdentifier();
         $this->creatorId = $creatorId;
@@ -129,37 +130,6 @@ class Event
     }
 
     /**
-     * @param string $eventId
-     *
-     * @return Event
-     */
-    public static function getEventFromDB($eventId)
-    {
-        $em = Event::getDoctrine()->getManager();
-
-        $RAW_QUERY = 'SELECT * FROM event where invitation_code = :event;';
-
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        // Set parameters
-        $statement->bindValue('event', $eventId);
-        $statement->execute();
-
-        $result = $statement->fetchAll();
-        $row=$result[0];
-
-        $event = new self(
-            $row["creator"],
-            $row["event_time"],
-            $row["displayname"],
-            $row["category"]
-        );
-        $event->eventId = $eventId;
-        $event->output_cache=$row["output_cache"];
-
-        return $event;
-    }
-
-    /**
      * @param Participant $participant
      * @return bool
      */
@@ -197,5 +167,21 @@ class Event
         }
 
         return $string;
+    }
+
+    /**
+     * @param string $authToken
+     *
+     * @return bool
+     */
+    public function isParticipant($authToken)
+    {
+        foreach ($this->participants as $participant) {
+            if ($participant->auth_token === $authToken) {
+                return true;
+            }
+        }
+
+        return $this->creatorId === $authToken;
     }
 }

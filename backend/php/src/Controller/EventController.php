@@ -9,6 +9,7 @@ use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class EventController extends FOSRestController
 {
@@ -61,30 +62,22 @@ class EventController extends FOSRestController
      * @return JsonResponse
      *
      * get all data needed for displaying subscribed event
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function getEventAction(Request $request, $eventId)
     {
         if (!$request->headers->has(self::HEADER_AUTHORIZATION)) {
             throw new AccessDeniedHttpException();
         }
-
-        //TODO move somewhere else
-        $em = $this->getDoctrine()->getManager();
-
-        $RAW_QUERY = 'SELECT * FROM participation where client = :client and event = :event;';
-
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        // Set parameters
-        $statement->bindValue('client', $request->headers->get(self::HEADER_AUTHORIZATION));
-        $statement->bindValue('event', $eventId);
-        $statement->execute();
-
-        $result = $statement->fetchAll();
-        if(!$result){
-            throw new AccessDeniedHttpException();
+        $event = $this->eventRepository->getEvent($eventId);
+        if (is_null($event)) {
+            throw  new NotFoundHttpException();
         }
 
-        $event = Event::getEventFromDB($eventId);
+        $authToken = $request->headers->get(self::HEADER_AUTHORIZATION);
+        if(!$event->isParticipant($authToken)){
+            throw new AccessDeniedHttpException();
+        }
 
         return new JsonResponse($event);
     }
