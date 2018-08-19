@@ -2,7 +2,7 @@ import grequests
 import json
 import itertools
 import dateutil
-
+import datetime
 
 def get_multiple_async(urls,max_requests=32):
     out=[]
@@ -29,7 +29,7 @@ def bundles_to_json_responses(bundles):
     return (decode_single_api_response(each) for each in responses)
 
 def generate_bundle_set(arrival_time, starting_location, steps_iter=range(0,90,10)):
-    return ({"start_time":arrival_time-step,"max_time":step,"starting_location":starting_location} for step in steps_iter)
+    return ({"start_time":arrival_time-datetime.timedelta(minutes=step),"max_time":step,"starting_location":starting_location} for step in steps_iter)
 
 def bundle_iterator(responses,lens):
     pos=0
