@@ -9,6 +9,13 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
 
         get = parse_qs(urlparse(self.path).query)
+        try:
+            get["arrival_time"][0]
+            json.loads(get["starting_locations"][0])
+        except:
+            self.send_response(400)
+            self.end_headers()
+            return
 
         result=optimal_meeting_points(get["arrival_time"][0],json.loads(get["starting_locations"][0]))
 
