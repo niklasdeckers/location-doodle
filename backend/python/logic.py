@@ -89,7 +89,7 @@ def improve_starting_location(location):
     url+="&max=1"
     contents = urllib.request.urlopen(url).read()
     parsed=json.loads(contents)
-    return parsed["Res"]["Stations"]["Stn"][0]["y"]+","+parsed["Res"]["Stations"]["Stn"][0]["0"]
+    return str(parsed["Res"]["Stations"]["Stn"][0]["y"])+","+str(parsed["Res"]["Stations"]["Stn"][0]["x"])
 
 def optimal_meeting_points(arrival_time, starting_locations,topic=""):
 
