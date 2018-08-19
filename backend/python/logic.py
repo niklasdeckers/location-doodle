@@ -63,7 +63,8 @@ def process_single_bundle_set_results(results,arrival_time):
 
 def optimize(maps,k=3):#TODO extend
     s=sum((collections.Counter(map) for map in maps),collections.Counter())
-    return [min( list(set().union(*(map.keys() for map in maps))), key=(lambda k: s[k]))]
+    justice_factor=lambda k: abs(max(map[k] for map in maps)-min(map[k] for map in maps))
+    return [min( list(set().intersection(*(map.keys() for map in maps))), key=(lambda k: s[k]+justice_factor(k)))]
 
 def optimal_meeting_points(arrival_time, starting_locations):
     arrival_time = dateutil.parser.parse(arrival_time)
@@ -73,13 +74,13 @@ def optimal_meeting_points(arrival_time, starting_locations):
     #input(res)
     maps=[]
     for each in res:
-        if True:#try:
+        try:#if True:#try:
             #print(json.dumps(each))
-            print((each[0]))
+            #print((each[0]))
             each[0][0]["Res"]["Isochrone"]
             single_map=process_single_bundle_set_results(each,arrival_time)
             maps.append(single_map)
-        if False:#except:#error in api response
+        except:#if False:#except:#error in api response
             pass
     if len(maps)==0:
         return #TODO dann auftraggeber-Startpunkt verwenden?
