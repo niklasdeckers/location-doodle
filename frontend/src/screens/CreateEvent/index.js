@@ -69,6 +69,7 @@ class CreateEvent extends Component {
       event_start_time: datetime.toISOString(),
       event_topic: selectedFilter.value
     }
+    console.log(this.props.token);
 
     try {
       const response = await fetch('http://locle.andy-rosslau.de:18181/api/events', {

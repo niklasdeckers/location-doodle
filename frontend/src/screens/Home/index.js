@@ -16,6 +16,7 @@ class Home extends Component {
   }
 
   async componentDidMount() {
+    console.log('test')
     const token = await AsyncStorage.getItem('@TokenStore:Token')
 
     if(!token) {

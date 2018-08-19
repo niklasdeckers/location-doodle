@@ -28,7 +28,7 @@ class Home extends Component {
     if(!this.state.eventCode) {
       return false;
     }
-
+    
     try {
       const response = await fetch('http://locle.andy-rosslau.de:18181/api/events/' + this.state.eventCode, {
         method: 'GET',
@@ -39,6 +39,7 @@ class Home extends Component {
           'Authorization': this.props.token,
         },
       })
+
       const json = await response.json();
       this.props.dispatch(setEvent(json));
 

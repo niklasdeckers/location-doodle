@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
-import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import { StyleSheet, Text, View, Image, TouchableOpacity, AsyncStorage } from 'react-native';
+import MapView, { PROVIDER_GOOGLE, Marker, Circle } from 'react-native-maps';
 import * as globalStyles from "../../styles/global";
 import { connect } from 'react-redux';
+import { setAppToken } from '../../actions/RootAction';
 
 const mapStateToProps = (store) => {
   return {
@@ -27,7 +28,18 @@ class ViewEvent extends Component {
     this.fitToCoordinates = this.fitToCoordinates.bind(this);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    // try {
+    //   const response = await fetch('http://locle.andy-rosslau.de:18181/api/auth');
+    //   const json = await response.json();
+    //
+    //   await AsyncStorage.setItem('@TokenStore:Token', json);
+    //   this.props.dispatch(setAppToken(json));
+    //   console.log(json);
+    // } catch (error) {
+    //   console.log(error);
+    // }
+
     this.fitToCoordinates();
   }
 
@@ -45,6 +57,8 @@ class ViewEvent extends Component {
         longitude: participant.location.lng,
       }
     })
+
+    latlng.push({ latitude: 52.521443, longitude: 13.306226 })
 
     setTimeout(() => {
       this.mapContainer.fitToCoordinates(latlng, {
@@ -81,6 +95,15 @@ class ViewEvent extends Component {
                 return <Marker key={participant.displayName + '-' + i} coordinate={ latlng }/>
               })
             }
+
+            <Marker coordinate={ { latitude: 52.521443, longitude: 13.306226 } } />
+
+            <Circle center={{ latitude: 52.523779, longitude: 13.357018 }}
+              radius={ 150 }
+              strokeWidth={ 2 }
+              zIndex={ 5001 }
+              strokeColor={ "#ffffff" }
+              fillColor={ "#0000ff" } />
           </MapView>
         </View>
 
@@ -91,6 +114,8 @@ class ViewEvent extends Component {
                 return <Text key={participant.displayName} style={ styles.participant }>{ participant.displayName }</Text>
             })
           }
+
+          <Text style={ styles.participant }>Erik</Text>
         </View>
 
         <TouchableOpacity style={ styles.backButtonContainer }
