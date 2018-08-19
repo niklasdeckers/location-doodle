@@ -11,4 +11,6 @@ COPY . .
 
 RUN composer install
 
+RUN docker-php-ext-install pdo_mysql
+
 CMD [ "php", "./bin/console", "server:run", "0.0.0.0:8181" ]
