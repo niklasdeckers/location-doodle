@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Model\Event;
 use App\Model\Participant;
+use App\Model\SuggestedLocation;
 use App\Repository\EventRepository;
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -76,7 +77,7 @@ class EventController extends FOSRestController
 
         $authToken = $request->headers->get(self::HEADER_AUTHORIZATION);
         if(!$event->isParticipant($authToken)){
-            throw new AccessDeniedHttpException();
+            //throw new AccessDeniedHttpException(); - allow for presentation
         }
 
         return new JsonResponse($event);
@@ -110,6 +111,41 @@ class EventController extends FOSRestController
         $this->eventRepository->save($event);
 
         return new JsonResponse($event);
+    }
+
+    /**
+     * @param Request $request
+     * @param string $eventId
+     * @return JsonResponse
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function getEventSuggestAction(Request $request, $eventId)
+    {
+        if (!$request->headers->has(self::HEADER_AUTHORIZATION)) {
+            throw new AccessDeniedHttpException();
+        }
+
+        $event = $this->eventRepository->getEvent($eventId);
+        if (is_null($event) || is_null($event->output_cache)) {
+            throw  new NotFoundHttpException();
+        }
+
+        $authToken = $request->headers->get(self::HEADER_AUTHORIZATION);
+        if(!$event->isParticipant($authToken)){
+            throw new AccessDeniedHttpException();
+        }
+
+
+        $suggestedLocation = new SuggestedLocation(
+            $event->output_cache[0]->Stn[0]->name,
+            [
+                'lat' => (float) $event->output_cache[0]->Stn[0]->y,
+                'lng' => (float) $event->output_cache[0]->Stn[0]->x
+            ],
+            'pending'
+        );
+
+        return new JsonResponse($suggestedLocation);
     }
 
     /**

@@ -115,7 +115,7 @@ class EventRepository
             $row['category']
         );
         $event->eventId = $eventId;
-        $event->output_cache = $row['output_cache'];
+        $event->output_cache = json_decode($row['output_cache']);
 
         $this->attachParticipants($event);
 
@@ -152,13 +152,14 @@ class EventRepository
     {
         $locations = [];
         foreach ($event->participants as $participant) {
-            $locations[] = $participant->location['lat'].','.$participant->location['lat'];
+            $locations[] = '"' . $participant->location['lat'].','.$participant->location['lng'] . '"';
         }
+        $locationsString = '[' . urldecode(implode(',', $locations)) . ']';
 
-        if (count($locations) > 0) {
+        if ($locationsString !== '[]') {
             $url = "http://backend_python:8080?arrival_time=".urlencode($event->startTime->format(
-                    'Y-m-d H:i:s'
-                ))."&starting_locations=" . urlencode(json_encode($locations)) . "&topic=" . urlencode($event->topic);
+                    \DateTime::ISO8601
+                ))."&starting_locations=" . $locationsString . "&topic=" . urlencode($event->topic);
             $this->logger->debug('<python_call>'.$url);
             $event->output_cache = @file_get_contents($url);
             $this->logger->debug('<python_result>'.$event->output_cache);
