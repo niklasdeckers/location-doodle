@@ -25,7 +25,7 @@ class AuthController extends FOSRestController
 
         //$result = $statement->fetchAll();
 
-        return new JsonResponse(hash('sha512',$uuid ));
+        return new JsonResponse($uuid);
     }
 
     /**
@@ -35,6 +35,6 @@ class AuthController extends FOSRestController
     {
         $now = new \DateTime();
 
-        return uniqid($now->getTimestamp());
+        return hash('sha512',uniqid($now->getTimestamp()));
     }
 }
