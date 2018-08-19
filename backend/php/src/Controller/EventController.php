@@ -56,7 +56,7 @@ class EventController extends FOSRestController
             throw new AccessDeniedHttpException();
         }
 
-
+        //TODO move somewhere else
         $em = $this->getDoctrine()->getManager();
 
         $RAW_QUERY = 'SELECT * FROM participation where client = :client and event = :event;';
@@ -73,7 +73,7 @@ class EventController extends FOSRestController
         }
 
 
-        $event=getEventFromDB($eventId);
+        $event=Event::getEventFromDB($eventId);
 
         return new JsonResponse($event);
     }
@@ -94,7 +94,7 @@ class EventController extends FOSRestController
 
         $name = $request->get(self::PARAM_PARTICIPANT_DISPLAY_NAME);
         $location = $request->get(self::PARAM_PARTICIPANT_LOCATION);
-        $participant = new Participant($name, $location, false);
+        $participant = new Participant($name, $location, $request->headers->get(self::HEADER_AUTHORIZATION));
 
         $event = Event::getEventFromDB($eventId);
         $event->addParticipantToDB($participant);
@@ -111,17 +111,17 @@ class EventController extends FOSRestController
      */
     private function createEventByRequest(Request $request)
     {
-        $invitorName = $request->get(self::PARAM_INVITOR_DISPLAY_NAME);
-        $location = $request->get(self::PARAM_INVITOR_LOCATION);
-        $invitor = new Participant($invitorName, $location, true);
-
+        //$invitorName = $request->get(self::PARAM_INVITOR_DISPLAY_NAME);
+        //$location = $request->get(self::PARAM_INVITOR_LOCATION);
+        //$invitor = new Participant($invitorName, $location, true);
+        $creator_id= $request->headers->get(self::HEADER_AUTHORIZATION);
         $startTime = new \DateTime($request->get(self::PARAM_EVENT_START_TIME));
         //$subscriptionDeadline = new \DateTime($request->get(self::PARAM_EVENT_SUBSCRIPTION_DEADLINE));
         $displayName = $request->get(self::PARAM_EVENT_DISPLAY_NAME);
         $topic = $request->get(self::PARAM_EVENT_TOPIC);
 
         $event = new Event(
-            $invitor,
+            $creator_id,
             $startTime,
             //$subscriptionDeadline,
             $displayName,
