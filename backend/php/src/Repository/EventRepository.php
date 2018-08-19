@@ -5,6 +5,8 @@ namespace App\Repository;
 use App\Model\Event;
 use App\Model\Participant;
 use Doctrine\DBAL\Connection;
+use Psr\Log\LoggerInterface;
+use Psr\Log\Test\LoggerInterfaceTest;
 
 class EventRepository
 {
@@ -12,13 +14,19 @@ class EventRepository
      * @var Connection
      */
     private $connection;
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      * @param Connection $connection
+     * @param LoggerInterface $logger
      */
-    public function __construct(Connection $connection)
+    public function __construct(Connection $connection, LoggerInterface $logger)
     {
         $this->connection = $connection;
+        $this->logger = $logger;
     }
 
     /**
@@ -27,6 +35,8 @@ class EventRepository
      */
     public function save(Event $event)
     {
+        $this->determineOutputCache($event);
+
         $statement = $this->connection->prepare(
             '
             INSERT INTO
@@ -51,7 +61,9 @@ class EventRepository
             $statement = $this->connection->prepare(
                 '
                 INSERT INTO participation (client, event, location, displayname) 
-                VALUES (:client, :event, :location, :displayname);
+                VALUES (:client, :event, :location, :displayname)
+                ON DUPLICATE KEY UPDATE displayname = :displayname, location = :location
+                ;
                 '
             );
 
@@ -130,6 +142,28 @@ class EventRepository
             $participant->setEventId($event->eventId);
 
             $event->participants[] = $participant;
+        }
+    }
+
+    /**
+     * @param Event $event
+     */
+    private function determineOutputCache(Event $event)
+    {
+        $locations = [];
+        foreach ($event->participants as $participant) {
+            $locations[] = $participant->location['lat'].','.$participant->location['lat'];
+        }
+
+        if (count($locations) > 0) {
+            $url = "http://backend_python:8080?arrival_time=".urlencode($event->startTime->format(
+                    'Y-m-d H:i:s'
+                ))."&starting_locations=" . urlencode(json_encode($locations)) . "&topic=" . urlencode($event->topic);
+            $this->logger->debug('<python_call>'.$url);
+            $event->output_cache = @file_get_contents($url);
+            $this->logger->debug('<python_result>'.$event->output_cache);
+        } else {
+            $this->logger->debug('<python_call> none');
         }
     }
 }
