@@ -2,7 +2,6 @@ import grequests
 import json
 import itertools
 import dateutil
-import datetime
 
 
 def get_multiple_async(urls,max_requests=32):
@@ -18,7 +17,7 @@ def generate_single_api_url(start_time, max_time, starting_location):
     url+="&time="+start_time.isoformat()
     url+="&center="+starting_location
     url+="&maxChange=6"
-    url+="&maxDur="+max_time.minutes#todo is this useful? could also just take everything
+    url+="&maxDur="+max_time#todo is this useful? could also just take everything
     url+="&timespan=1000"#TODO is this useful?
     return url
 
@@ -29,7 +28,7 @@ def bundles_to_json_responses(bundles):
     responses = get_multiple_async([generate_single_api_url(**bundle) for bundle in bundles])
     return (decode_single_api_response(each) for each in responses)
 
-def generate_bundle_set(arrival_time, starting_location, steps_iter=[datetime.timedelta(minutes=m) for m in range(0,90,10)]):
+def generate_bundle_set(arrival_time, starting_location, steps_iter=range(0,90,10)):
     return ({"start_time":arrival_time-step,"max_time":step,"starting_location":starting_location} for step in steps_iter)
 
 def bundle_iterator(responses,lens):
