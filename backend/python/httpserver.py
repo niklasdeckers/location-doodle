@@ -10,7 +10,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
         get = parse_qs(urlparse(self.path).query)
 
-        result=optimal_meeting_points(get["arrival_time"],json.loads(get["starting_locations"]))
+        result=optimal_meeting_points(get["arrival_time"][0],json.loads(get["starting_locations"][0]))
 
         DUMMY_RESPONSE=json.dumps(result)
 
