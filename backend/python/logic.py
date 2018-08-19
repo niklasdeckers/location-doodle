@@ -4,6 +4,7 @@ import itertools
 import dateutil.parser
 import datetime
 import collections
+import urllib.request
 
 def get_multiple_async(urls,max_requests=32):
     out=[]
@@ -62,9 +63,20 @@ def process_single_bundle_set_results(results,arrival_time):
     return total_mapping
 
 def optimize(maps,k=3):#TODO extend
+    #input(maps)
     s=sum((collections.Counter(map) for map in maps),collections.Counter())
     justice_factor=lambda k: abs(max(map[k] for map in maps)-min(map[k] for map in maps))
-    return [min( list(set().intersection(*(map.keys() for map in maps))), key=(lambda k: s[k]+justice_factor(k)))]
+    return [min( list(set.intersection(*(set(map.keys()) for map in maps))), key=(lambda k: s[k]+justice_factor(k)))]
+
+
+def station_search(stnIds):
+    #print(starting_location)
+    url="https://transit.api.here.com/v3/stations/by_ids.json"
+    url+="?app_id=inyah45axuPunUzafruc"
+    url+="&app_code=dSeR84rhEUZEwBEV1NVGaA"
+    url+="&stnIds="+",".join(stnIds)
+    return url
+
 
 def optimal_meeting_points(arrival_time, starting_locations):
     arrival_time = dateutil.parser.parse(arrival_time)
@@ -92,13 +104,10 @@ def optimal_meeting_points(arrival_time, starting_locations):
 
         #todo apply weight function for best picks
 
-
-
-
-
-
-    best=bests[0]
+    contents = urllib.request.urlopen(station_search(bests)).read()
+    parsed=json.loads(contents)
+    """best=bests[0]#todo bad, use api
     for v in res[0][0][0]["Res"]["Isochrone"]["IsoDest"]:
         if v["Stn"][0]["id"]==best:
-            return v
-    return bests
+            return v"""
+    return parsed, bests
