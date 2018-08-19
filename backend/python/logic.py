@@ -96,5 +96,8 @@ def optimal_meeting_points(arrival_time, starting_locations):
 
 
 
-
+    best=bests[0]
+    for v in res[0][0][0]["Res"]["Isochrone"]["IsoDest"]:
+        if v["Stn"][0]["id"]==best:
+            return v
     return bests
