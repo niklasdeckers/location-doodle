@@ -131,26 +131,41 @@ class Event
 
     /**
      * @param Participant $participant
+     */
+    public function addParticipant(Participant $participant)
+    {
+        if (!$this->hasParticipant($participant->auth_token)) {
+            $this->participants[] = $participant;
+        }
+    }
+
+    /**
+     * @param string $authToken
+     *
      * @return bool
      */
-    private function hasParticipant(Participant $participant)
+    public function isParticipant($authToken)
     {
-
-        $em = $this->getDoctrine()->getManager();
-
-        $RAW_QUERY = 'SELECT * FROM participation where client = :client and event = :event;';
-
-        $statement = $em->getConnection()->prepare($RAW_QUERY);
-        // Set parameters
-        $statement->bindValue('client', $participant->auth_token);
-        $statement->bindValue('event', $this->eventId);
-        $statement->execute();
-
-        $result = $statement->fetchAll();
-        if(!$result){
-            return false;
+        if ($this->hasParticipant($authToken)) {
+            return true;
         }
-        return true;
+
+        return $this->creatorId === $authToken;
+    }
+
+    /**
+     * @param string $authToken
+     * @return bool
+     */
+    private function hasParticipant($authToken)
+    {
+        foreach ($this->participants as $tmpParticipant) {
+            if ($tmpParticipant->auth_token === $authToken) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -167,21 +182,5 @@ class Event
         }
 
         return $string;
-    }
-
-    /**
-     * @param string $authToken
-     *
-     * @return bool
-     */
-    public function isParticipant($authToken)
-    {
-        foreach ($this->participants as $participant) {
-            if ($participant->auth_token === $authToken) {
-                return true;
-            }
-        }
-
-        return $this->creatorId === $authToken;
     }
 }

@@ -89,6 +89,7 @@ class EventController extends FOSRestController
      * @return JsonResponse
      *
      * subscribe to event (accept invitation via multi-use link)
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function postEventParticipantAction(Request $request, $eventId)
     {
@@ -100,8 +101,13 @@ class EventController extends FOSRestController
         $location = $request->get(self::PARAM_PARTICIPANT_LOCATION);
         $participant = new Participant($name, $location, $request->headers->get(self::HEADER_AUTHORIZATION));
 
-        $event = Event::getEventFromDB($eventId);
-        $event->addParticipantToDB($participant);
+        $event = $this->eventRepository->getEvent($eventId);
+        if (is_null($event)) {
+            throw  new NotFoundHttpException();
+        }
+
+        $event->addParticipant($participant);
+        $this->eventRepository->save($event);
 
         return new JsonResponse($event);
     }

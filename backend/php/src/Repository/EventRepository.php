@@ -51,7 +51,7 @@ class EventRepository
             $statement = $this->connection->prepare(
                 '
                 INSERT INTO participation (client, event, location, displayname) 
-                VALUES  :client, :event, :location, :displayname);
+                VALUES (:client, :event, :location, :displayname);
                 '
             );
 
