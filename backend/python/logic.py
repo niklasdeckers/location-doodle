@@ -52,15 +52,17 @@ def join_split_bundle_sets(bundle_sets):
     return bundle_iterator(list(zip(responses,bundles)),lens)
 
 def process_single_bundle_set_results(results,arrival_time):
+    helper_mapping={}
     total_mapping={}
     for result,bundle in results:
         current_mapping={v["Stn"][0]["id"]: (arrival_time-bundle["start_time"]).total_seconds()//60 for v in result["Res"]["Isochrone"]["IsoDest"] if bundle["start_time"]+datetime.timedelta(minutes=int(''.join(c for c in v["duration"] if c.isdigit())))<=arrival_time}
+        helper_mapping.update({v["Stn"][0]["id"]: v for v in result["Res"]["Isochrone"]["IsoDest"]})
         for k,v in current_mapping.items():
             if k in total_mapping:
                 total_mapping[k]=min(total_mapping[k],current_mapping[k])
             else:
                 total_mapping[k]=current_mapping[k]
-    return total_mapping
+    return total_mapping,helper_mapping
 
 def optimize(maps,k=3):#TODO extend
     #input(maps)
@@ -85,12 +87,14 @@ def optimal_meeting_points(arrival_time, starting_locations):
     res=list(res_generator)
     #input(res)
     maps=[]
+    helper={}
     for each in res:
         try:#if True:#try:
             #print(json.dumps(each))
             #print((each[0]))
             each[0][0]["Res"]["Isochrone"]
-            single_map=process_single_bundle_set_results(each,arrival_time)
+            single_map,helper2=process_single_bundle_set_results(each,arrival_time)
+            helper.update(helper2)
             maps.append(single_map)
         except:#if False:#except:#error in api response
             pass
@@ -100,14 +104,14 @@ def optimal_meeting_points(arrival_time, starting_locations):
 
         bests=optimize(maps)#todo weighted sum
 
+    #input(helper)
 
-
-        #todo apply weight function for best picks
-
-    contents = urllib.request.urlopen(station_search(bests)).read()
-    parsed=json.loads(contents)
+    #todo apply weight function for best picks
+    return [helper[best] for best in bests]
+    #contents = urllib.request.urlopen(station_search(bests)).read()
+    #parsed=json.loads(contents)
     """best=bests[0]#todo bad, use api
     for v in res[0][0][0]["Res"]["Isochrone"]["IsoDest"]:
         if v["Stn"][0]["id"]==best:
             return v"""
-    return parsed, bests
+    #return bests
