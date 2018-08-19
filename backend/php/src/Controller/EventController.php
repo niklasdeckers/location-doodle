@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Model\Event;
 use App\Model\Participant;
+use App\Repository\EventRepository;
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,16 +14,25 @@ class EventController extends FOSRestController
 {
     const HEADER_AUTHORIZATION = 'Authorization';
 
-    const PARAM_INVITOR_DISPLAY_NAME = 'invitor_display_name';
-    const PARAM_INVITOR_LOCATION = 'invitor_location';
-
     const PARAM_PARTICIPANT_DISPLAY_NAME = 'participant_display_name';
     const PARAM_PARTICIPANT_LOCATION = 'participant_location';
 
-    //const PARAM_EVENT_SUBSCRIPTION_DEADLINE = 'event_subscription_deadline';
     const PARAM_EVENT_START_TIME = 'event_start_time';
     const PARAM_EVENT_DISPLAY_NAME = 'event_display_name';
     const PARAM_EVENT_TOPIC = 'event_topic';
+
+    /**
+     * @var EventRepository
+     */
+    private $eventRepository;
+
+    /**
+     * @param EventRepository $eventRepository
+     */
+    public function __construct(EventRepository $eventRepository)
+    {
+        $this->eventRepository = $eventRepository;
+    }
 
     /**
      * @param Request $request
@@ -30,6 +40,7 @@ class EventController extends FOSRestController
      * @return JsonResponse
      *
      * Create new event (calls background method)
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function postEventAction(Request $request)
     {
@@ -38,6 +49,7 @@ class EventController extends FOSRestController
         }
 
         $event = $this->createEventByRequest($request);
+        $this->eventRepository->save($event);
 
         return new JsonResponse($event);
     }
@@ -72,8 +84,7 @@ class EventController extends FOSRestController
             throw new AccessDeniedHttpException();
         }
 
-
-        $event=Event::getEventFromDB($eventId);
+        $event = Event::getEventFromDB($eventId);
 
         return new JsonResponse($event);
     }
@@ -106,29 +117,20 @@ class EventController extends FOSRestController
      * @param Request $request
      *
      * @return Event
-     *
-     * Create new event
      */
     private function createEventByRequest(Request $request)
     {
-        //$invitorName = $request->get(self::PARAM_INVITOR_DISPLAY_NAME);
-        //$location = $request->get(self::PARAM_INVITOR_LOCATION);
-        //$invitor = new Participant($invitorName, $location, true);
-        $creator_id= $request->headers->get(self::HEADER_AUTHORIZATION);
+        $creatorId = $request->headers->get(self::HEADER_AUTHORIZATION);
         $startTime = new \DateTime($request->get(self::PARAM_EVENT_START_TIME));
-        //$subscriptionDeadline = new \DateTime($request->get(self::PARAM_EVENT_SUBSCRIPTION_DEADLINE));
         $displayName = $request->get(self::PARAM_EVENT_DISPLAY_NAME);
         $topic = $request->get(self::PARAM_EVENT_TOPIC);
 
         $event = new Event(
-            $creator_id,
+            $creatorId,
             $startTime,
-            //$subscriptionDeadline,
             $displayName,
             $topic
         );
-
-        $event->writeToDB();
 
         return $event;
     }
