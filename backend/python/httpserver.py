@@ -17,7 +17,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             return
 
-        result=optimal_meeting_points(get["arrival_time"][0],json.loads(get["starting_locations"][0]))
+        result=optimal_meeting_points(get["arrival_time"][0],json.loads(get["starting_locations"][0]),get["topic"][0])
 
         DUMMY_RESPONSE=json.dumps(result)
 
