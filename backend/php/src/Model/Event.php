@@ -139,7 +139,7 @@ class Event
      */
     public static function getEventFromDB($eventId)
     {
-        $em = $this->getDoctrine()->getManager();
+        $em = Event::getDoctrine()->getManager();
 
         $RAW_QUERY = 'SELECT * FROM event where invitation_code = :event;';
 
