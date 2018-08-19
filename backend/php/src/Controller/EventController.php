@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Model\Event;
 use App\Model\Participant;
+use App\Model\SuggestedLocation;
 use App\Repository\EventRepository;
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -76,7 +77,7 @@ class EventController extends FOSRestController
 
         $authToken = $request->headers->get(self::HEADER_AUTHORIZATION);
         if(!$event->isParticipant($authToken)){
-            throw new AccessDeniedHttpException();
+            //throw new AccessDeniedHttpException(); - allow for presentation
         }
 
         return new JsonResponse($event);
@@ -110,6 +111,55 @@ class EventController extends FOSRestController
         $this->eventRepository->save($event);
 
         return new JsonResponse($event);
+    }
+
+    /**
+     * @param Request $request
+     * @param string $eventId
+     * @return JsonResponse
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function getEventSuggestAction(Request $request, $eventId)
+    {
+        if (!$request->headers->has(self::HEADER_AUTHORIZATION)) {
+            throw new AccessDeniedHttpException();
+        }
+
+        $event = $this->eventRepository->getEvent($eventId);
+        if (is_null($event) || is_null($event->output_cache)) {
+            throw  new NotFoundHttpException();
+        }
+
+        $authToken = $request->headers->get(self::HEADER_AUTHORIZATION);
+        if(!$event->isParticipant($authToken)){
+            throw new AccessDeniedHttpException();
+        }
+
+
+        $suggestedLocation = new SuggestedLocation(
+            $event->output_cache[0]->Stn[0]->name,
+            [
+                'lat' => (float) $event->output_cache[0]->Stn[0]->y,
+                'lng' => (float) $event->output_cache[0]->Stn[0]->x
+            ],
+            'pending'
+        );
+
+        // TODO: Fix python stack for bettter dertermination of nearest station
+        // TODO: Ask here api for Point of interest near the outpu_cache
+        // curl \
+        // --compressed \
+        //     -H 'Accept-Encoding:gzip' \
+        //     -H 'Accept-Language:de,de-DE;q=0.9,en-US;q=0.8,en;q=0.7,af;q=0.6' \
+        //     --get 'https://places.api.here.com/places/v1/discover/around' \
+        //     --data-urlencode 'app_code=dSeR84rhEUZEwBEV1NVGaA' \
+        //     --data-urlencode 'app_id=inyah45axuPunUzafruc' \
+        //     --data-urlencode 'cat=eat-drink' \
+        //     --data-urlencode 'in=52.510001,13.435747;r=1000' \
+        //     --data-urlencode 'pretty=true' \
+        //     --data-urlencode 'tf=plain'
+
+        return new JsonResponse($suggestedLocation);
     }
 
     /**
